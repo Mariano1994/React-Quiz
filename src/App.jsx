@@ -11,6 +11,7 @@ const initialState = {
 
   //Possible Values of state: 'Loading', 'Error', 'Ready'. 'Active', 'Finished'
   status: "Loading",
+  indexOfCurrentQuestion: 0,
 };
 
 function reducer(state, action) {
@@ -27,7 +28,10 @@ function reducer(state, action) {
 }
 
 export function App() {
-  const [{ questions, status }, dispacth] = useReducer(reducer, initialState);
+  const [{ questions, status, indexOfCurrentQuestion }, dispacth] = useReducer(
+    reducer,
+    initialState
+  );
   const totalQuestions = questions.length;
 
   useEffect(() => {
@@ -55,7 +59,9 @@ export function App() {
               onSartQuiz={handleStartQuiz}
             />
           )}
-          {status === "Active" && <Question />}
+          {status === "Active" && (
+            <Question question={questions[indexOfCurrentQuestion]} />
+          )}
         </Main>
       </div>
     </>
