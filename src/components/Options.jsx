@@ -1,4 +1,4 @@
-export function Options({ question, userAnswer, onNewUserAnswer }) {
+export function Options({ question, userAnswer, dispatch }) {
   const hasAnswer = userAnswer !== null;
   return (
     <>
@@ -16,7 +16,7 @@ export function Options({ question, userAnswer, onNewUserAnswer }) {
                     : "wrong"
                   : ""
               }`}
-              onClick={() => onNewUserAnswer(index)}
+              onClick={() => dispatch({ type: "userAnswer", payload: index })}
               disabled={hasAnswer}
             >
               {option}

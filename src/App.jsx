@@ -27,7 +27,7 @@ function reducer(state, action) {
     case "quizStarted":
       return { ...state, status: "Active" };
     case "userAnswer":
-      const question = state.questions.at(state.index);
+      const question = state.questions.at(state.indexOfCurrentQuestion);
 
       return {
         ...state,
@@ -52,7 +52,7 @@ function reducer(state, action) {
 export function App() {
   const [
     { questions, status, indexOfCurrentQuestion, userAnswer, userScore },
-    dispacth,
+    dispatch,
   ] = useReducer(reducer, initialState);
   const totalQuestions = questions.length;
   const maxPossiblePoints = questions.reduce(
@@ -63,20 +63,20 @@ export function App() {
   useEffect(() => {
     fetch("http://localhost:9000/questions")
       .then((response) => response.json())
-      .then((data) => dispacth({ type: "dataReceived", payload: data }))
-      .catch((error) => dispacth({ type: "dataFeiled" }));
+      .then((data) => dispatch({ type: "dataReceived", payload: data }))
+      .catch((error) => dispatch({ type: "dataFeiled" }));
   }, []);
 
   function handleStartQuiz() {
-    dispacth({ type: "quizStarted" });
+    dispatch({ type: "quizStarted" });
   }
 
-  function handlerNewUserAnswer(index) {
-    dispacth({ type: "userAnswer", payload: index });
-  }
+  // function handlerNewUserAnswer(userAnswer) {
+  //   dispacth({ type: "userAnswer", payload: userAnswer });
+  // }
 
   function handleNextQuestion() {
-    dispacth({ type: "nextQuestion" });
+    dispatch({ type: "nextQuestion" });
   }
 
   return (
@@ -105,7 +105,8 @@ export function App() {
               <Question
                 question={questions[indexOfCurrentQuestion]}
                 userAnswer={userAnswer}
-                onNewUserAnswer={handlerNewUserAnswer}
+                dispatch={dispatch}
+                // onNewUserAnswer={handlerNewUserAnswer}
               />
               <NextButton
                 onGoToNextQuestion={handleNextQuestion}
