@@ -4,6 +4,7 @@ import { Loader } from "./components/Loader";
 import { Error } from "./components/Error";
 import { Main } from "./components/Main";
 import { StartScreen } from "./components/StartScreen";
+import { Question } from "./components/Question";
 
 const initialState = {
   questions: [],
@@ -18,6 +19,8 @@ function reducer(state, action) {
       return { ...state, questions: action.payload, status: "Ready" };
     case "dataFeiled":
       return { ...state, status: "Error" };
+    case "quizStarted":
+      return { ...state, status: "Active" };
     default:
       return new Error("Action unknown");
   }
@@ -26,7 +29,6 @@ function reducer(state, action) {
 export function App() {
   const [{ questions, status }, dispacth] = useReducer(reducer, initialState);
   const totalQuestions = questions.length;
-  console.log(questions);
 
   useEffect(() => {
     fetch("http://localhost:9000/questions")
@@ -34,6 +36,10 @@ export function App() {
       .then((data) => dispacth({ type: "dataReceived", payload: data }))
       .catch((error) => dispacth({ type: "dataFeiled" }));
   }, []);
+
+  function handleStartQuiz() {
+    dispacth({ type: "quizStarted" });
+  }
 
   return (
     <>
@@ -44,8 +50,12 @@ export function App() {
           {status === "Loading" && <Loader />}
           {status === "Error" && <Error />}
           {status === "Ready" && (
-            <StartScreen totalQuestions={totalQuestions} />
+            <StartScreen
+              totalQuestions={totalQuestions}
+              onSartQuiz={handleStartQuiz}
+            />
           )}
+          {status === "Active" && <Question />}
         </Main>
       </div>
     </>
