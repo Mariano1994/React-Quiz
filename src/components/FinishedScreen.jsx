@@ -1,11 +1,10 @@
 export function FinishedScreen({
   userScore,
   maxPossiblePoints,
-  userHighScore,
+  score,
+  onRestartQuiz,
 }) {
   const percentage = (userScore / maxPossiblePoints) * 100;
-  console.log(userHighScore);
-
   let emoji;
 
   if (percentage === 100) emoji = "🥇";
@@ -14,7 +13,6 @@ export function FinishedScreen({
   if (percentage >= 50 && percentage < 80) emoji = "😅";
   if (percentage >= 0 && percentage < 50) emoji = "🤨";
 
-  console.log(percentage);
   return (
     <>
       <p className="result">
@@ -22,7 +20,12 @@ export function FinishedScreen({
         == {Math.ceil(percentage)}%
       </p>
 
-      <p className="highscore"> (Highscore: {userHighScore} points)</p>
+      <p className="highscore"> Highscore: {score} points</p>
+
+      <button className="btn btn-ui" onClick={onRestartQuiz}>
+        {" "}
+        Restart
+      </button>
     </>
   );
 }

@@ -17,7 +17,7 @@ const initialState = {
   indexOfCurrentQuestion: 0,
   userAnswer: null,
   userScore: 0,
-  userHighScore: 0,
+  score: 0,
 };
 
 function reducer(state, action) {
@@ -50,10 +50,15 @@ function reducer(state, action) {
       return {
         ...state,
         status: "Finished",
-        userHighScore:
-          state.userScore > state.userHighScore
-            ? state.userScore
-            : state.userHighScore,
+        score: state.score > state.userScore ? state.score : state.userScore,
+      };
+
+    case "restart":
+      return {
+        ...initialState,
+        questions: state.questions,
+        status: "Ready",
+        score: state.score,
       };
     default:
       return new Error("Action unknown");
@@ -62,9 +67,8 @@ function reducer(state, action) {
 
 export function App() {
   const [
-    { questions, status, indexOfCurrentQuestion, userAnswer, userScore },
+    { questions, status, indexOfCurrentQuestion, userAnswer, userScore, score },
     dispatch,
-    userHighScore,
   ] = useReducer(reducer, initialState);
 
   const totalQuestions = questions.length;
@@ -84,16 +88,16 @@ export function App() {
     dispatch({ type: "quizStarted" });
   }
 
-  // function handlerNewUserAnswer(userAnswer) {
-  //   dispacth({ type: "userAnswer", payload: userAnswer });
-  // }
-
   function handleNextQuestion() {
     dispatch({ type: "nextQuestion" });
   }
 
   function handleFinishedQuiz() {
     dispatch({ type: "finishedQuiz" });
+  }
+
+  function handleRestarQuiz() {
+    dispatch({ type: "restart" });
   }
 
   return (
@@ -139,7 +143,8 @@ export function App() {
             <FinishedScreen
               userScore={userScore}
               maxPossiblePoints={maxPossiblePoints}
-              userHighScore={userHighScore}
+              score={score}
+              onRestartQuiz={handleRestarQuiz}
             />
           )}
         </Main>
