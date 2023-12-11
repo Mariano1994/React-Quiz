@@ -5,6 +5,7 @@ import { Error } from "./components/Error";
 import { Main } from "./components/Main";
 import { StartScreen } from "./components/StartScreen";
 import { Question } from "./components/Question";
+import { NextButton } from "./components/NextButton";
 
 const initialState = {
   questions: [],
@@ -35,6 +36,13 @@ function reducer(state, action) {
             ? state.userScore + question.points
             : state.userScore,
       };
+
+    case "nextQuestion":
+      return {
+        ...state,
+        indexOfCurrentQuestion: state.indexOfCurrentQuestion + 1,
+        userAnswer: null,
+      };
     default:
       return new Error("Action unknown");
   }
@@ -62,6 +70,10 @@ export function App() {
     dispacth({ type: "userAnswer", payload: index });
   }
 
+  function handleNextQuestion() {
+    dispacth({ type: "nextQuestion" });
+  }
+
   return (
     <>
       <div className="app">
@@ -77,11 +89,17 @@ export function App() {
             />
           )}
           {status === "Active" && (
-            <Question
-              question={questions[indexOfCurrentQuestion]}
-              userAnswer={userAnswer}
-              onNewUserAnswer={handlerNewUserAnswer}
-            />
+            <>
+              <Question
+                question={questions[indexOfCurrentQuestion]}
+                userAnswer={userAnswer}
+                onNewUserAnswer={handlerNewUserAnswer}
+              />
+              <NextButton
+                onGoToNextQuestion={handleNextQuestion}
+                userAnswer={userAnswer}
+              />
+            </>
           )}
         </Main>
       </div>
