@@ -6,11 +6,12 @@ import { Main } from "./components/Main";
 import { StartScreen } from "./components/StartScreen";
 import { Question } from "./components/Question";
 import { NextButton } from "./components/NextButton";
+import { ProgressBar } from "./components/ProgressBar";
 
 const initialState = {
   questions: [],
 
-  //Possible Values of state: 'Loading', 'Error', 'Ready'. 'Active', 'Finished'
+  //Possible Values of status: 'Loading', 'Error', 'Ready'. 'Active', 'Finished'
   status: "Loading",
   indexOfCurrentQuestion: 0,
   userAnswer: null,
@@ -54,6 +55,10 @@ export function App() {
     dispacth,
   ] = useReducer(reducer, initialState);
   const totalQuestions = questions.length;
+  const maxPossiblePoints = questions.reduce(
+    (prev, curr) => prev + curr.points,
+    0
+  );
 
   useEffect(() => {
     fetch("http://localhost:9000/questions")
@@ -90,6 +95,13 @@ export function App() {
           )}
           {status === "Active" && (
             <>
+              <ProgressBar
+                indexOfCurrentQuestion={indexOfCurrentQuestion}
+                totalQuestions={totalQuestions}
+                userScore={userScore}
+                maxPossiblePoints={maxPossiblePoints}
+                userAnswer={userAnswer}
+              />
               <Question
                 question={questions[indexOfCurrentQuestion]}
                 userAnswer={userAnswer}
