@@ -12,6 +12,8 @@ const initialState = {
   //Possible Values of state: 'Loading', 'Error', 'Ready'. 'Active', 'Finished'
   status: "Loading",
   indexOfCurrentQuestion: 0,
+  userAnswer: null,
+  userScore: 0,
 };
 
 function reducer(state, action) {
@@ -22,16 +24,27 @@ function reducer(state, action) {
       return { ...state, status: "Error" };
     case "quizStarted":
       return { ...state, status: "Active" };
+    case "userAnswer":
+      const question = state.questions.at(state.index);
+
+      return {
+        ...state,
+        userAnswer: action.payload,
+        userScore:
+          action.payload === question.correctOption
+            ? state.userScore + question.points
+            : state.userScore,
+      };
     default:
       return new Error("Action unknown");
   }
 }
 
 export function App() {
-  const [{ questions, status, indexOfCurrentQuestion }, dispacth] = useReducer(
-    reducer,
-    initialState
-  );
+  const [
+    { questions, status, indexOfCurrentQuestion, userAnswer, userScore },
+    dispacth,
+  ] = useReducer(reducer, initialState);
   const totalQuestions = questions.length;
 
   useEffect(() => {
@@ -43,6 +56,10 @@ export function App() {
 
   function handleStartQuiz() {
     dispacth({ type: "quizStarted" });
+  }
+
+  function handlerNewUserAnswer(index) {
+    dispacth({ type: "userAnswer", payload: index });
   }
 
   return (
@@ -60,7 +77,11 @@ export function App() {
             />
           )}
           {status === "Active" && (
-            <Question question={questions[indexOfCurrentQuestion]} />
+            <Question
+              question={questions[indexOfCurrentQuestion]}
+              userAnswer={userAnswer}
+              onNewUserAnswer={handlerNewUserAnswer}
+            />
           )}
         </Main>
       </div>
