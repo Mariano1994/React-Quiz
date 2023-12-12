@@ -8,6 +8,8 @@ import { Question } from "./components/Question";
 import { NextButton } from "./components/NextButton";
 import { ProgressBar } from "./components/ProgressBar";
 import { FinishedScreen } from "./components/FinishedScreen";
+import { Footer } from "./components/Footer";
+import { Timer } from "./components/Timer";
 
 const initialState = {
   questions: [],
@@ -18,7 +20,10 @@ const initialState = {
   userAnswer: null,
   userScore: 0,
   score: 0,
+  secondRemanining: null,
 };
+
+const SECOND_PER_QUESTION = 30;
 
 function reducer(state, action) {
   switch (action.type) {
@@ -27,7 +32,11 @@ function reducer(state, action) {
     case "dataFeiled":
       return { ...state, status: "Error" };
     case "quizStarted":
-      return { ...state, status: "Active" };
+      return {
+        ...state,
+        status: "Active",
+        secondRemanining: state.questions.length * SECOND_PER_QUESTION,
+      };
     case "userAnswer":
       const question = state.questions.at(state.indexOfCurrentQuestion);
 
@@ -60,6 +69,13 @@ function reducer(state, action) {
         status: "Ready",
         score: state.score,
       };
+
+    case "tick":
+      return {
+        ...state,
+        secondRemanining: state.secondRemanining - 1,
+        status: state.secondRemanining === 0 ? "Finished" : state.status,
+      };
     default:
       return new Error("Action unknown");
   }
@@ -67,7 +83,15 @@ function reducer(state, action) {
 
 export function App() {
   const [
-    { questions, status, indexOfCurrentQuestion, userAnswer, userScore, score },
+    {
+      questions,
+      status,
+      indexOfCurrentQuestion,
+      userAnswer,
+      userScore,
+      score,
+      secondRemanining,
+    },
     dispatch,
   ] = useReducer(reducer, initialState);
 
@@ -129,13 +153,20 @@ export function App() {
                 dispatch={dispatch}
                 // onNewUserAnswer={handlerNewUserAnswer}
               />
-              <NextButton
-                onGoToNextQuestion={handleNextQuestion}
-                userAnswer={userAnswer}
-                totalQuestions={totalQuestions}
-                indexOfCurrentQuestion={indexOfCurrentQuestion}
-                onFinishedQuiz={handleFinishedQuiz}
-              />
+
+              <Footer>
+                <Timer
+                  dispatch={dispatch}
+                  secondRemanining={secondRemanining}
+                />
+                <NextButton
+                  onGoToNextQuestion={handleNextQuestion}
+                  userAnswer={userAnswer}
+                  totalQuestions={totalQuestions}
+                  indexOfCurrentQuestion={indexOfCurrentQuestion}
+                  onFinishedQuiz={handleFinishedQuiz}
+                />
+              </Footer>
             </>
           )}
 
