@@ -11,6 +11,17 @@ import { FinishedScreen } from "./components/FinishedScreen";
 import { Footer } from "./components/Footer";
 import { Timer } from "./components/Timer";
 
+export const ACTIONS = {
+  DATA_RECEIVED: "dataReceived",
+  DATA_FEILED: "dataFeiled",
+  START_QUIZ: "quizStarted",
+  USER_RESPONSE: "userAnswer",
+  NEXT_QUESTION: "nextQuestion",
+  QUIZ_COMPLETED: "finishedQuiz",
+  RESTART_QUIZ: "restart",
+  TIME_TICK: "tick",
+};
+
 const initialState = {
   questions: [],
 
@@ -27,17 +38,17 @@ const SECOND_PER_QUESTION = 30;
 
 function reducer(state, action) {
   switch (action.type) {
-    case "dataReceived":
+    case ACTIONS.DATA_RECEIVED:
       return { ...state, questions: action.payload, status: "Ready" };
-    case "dataFeiled":
+    case ACTIONS.DATA_FEILED:
       return { ...state, status: "Error" };
-    case "quizStarted":
+    case ACTIONS.START_QUIZ:
       return {
         ...state,
         status: "Active",
         secondRemanining: state.questions.length * SECOND_PER_QUESTION,
       };
-    case "userAnswer":
+    case ACTIONS.USER_RESPONSE:
       const question = state.questions.at(state.indexOfCurrentQuestion);
 
       return {
@@ -48,21 +59,20 @@ function reducer(state, action) {
             ? state.userScore + question.points
             : state.userScore,
       };
-
-    case "nextQuestion":
+    case ACTIONS.NEXT_QUESTION:
       return {
         ...state,
         indexOfCurrentQuestion: state.indexOfCurrentQuestion + 1,
         userAnswer: null,
       };
-    case "finishedQuiz":
+    case ACTIONS.QUIZ_COMPLETED:
       return {
         ...state,
         status: "Finished",
         score: state.score > state.userScore ? state.score : state.userScore,
       };
 
-    case "restart":
+    case ACTIONS.RESTART_QUIZ:
       return {
         ...initialState,
         questions: state.questions,
@@ -70,7 +80,7 @@ function reducer(state, action) {
         score: state.score,
       };
 
-    case "tick":
+    case ACTIONS.TIME_TICK:
       return {
         ...state,
         secondRemanining: state.secondRemanining - 1,
@@ -108,18 +118,6 @@ export function App() {
       .catch((error) => dispatch({ type: "dataFeiled" }));
   }, []);
 
-  function handleStartQuiz() {
-    dispatch({ type: "quizStarted" });
-  }
-
-  function handleNextQuestion() {
-    dispatch({ type: "nextQuestion" });
-  }
-
-  function handleFinishedQuiz() {
-    dispatch({ type: "finishedQuiz" });
-  }
-
   function handleRestarQuiz() {
     dispatch({ type: "restart" });
   }
@@ -133,10 +131,7 @@ export function App() {
           {status === "Loading" && <Loader />}
           {status === "Error" && <Error />}
           {status === "Ready" && (
-            <StartScreen
-              totalQuestions={totalQuestions}
-              onSartQuiz={handleStartQuiz}
-            />
+            <StartScreen totalQuestions={totalQuestions} dispatch={dispatch} />
           )}
           {status === "Active" && (
             <>
@@ -151,7 +146,6 @@ export function App() {
                 question={questions[indexOfCurrentQuestion]}
                 userAnswer={userAnswer}
                 dispatch={dispatch}
-                // onNewUserAnswer={handlerNewUserAnswer}
               />
 
               <Footer>
@@ -160,11 +154,10 @@ export function App() {
                   secondRemanining={secondRemanining}
                 />
                 <NextButton
-                  onGoToNextQuestion={handleNextQuestion}
                   userAnswer={userAnswer}
                   totalQuestions={totalQuestions}
                   indexOfCurrentQuestion={indexOfCurrentQuestion}
-                  onFinishedQuiz={handleFinishedQuiz}
+                  dispatch={dispatch}
                 />
               </Footer>
             </>
@@ -175,7 +168,7 @@ export function App() {
               userScore={userScore}
               maxPossiblePoints={maxPossiblePoints}
               score={score}
-              onRestartQuiz={handleRestarQuiz}
+              dispatch={dispatch}
             />
           )}
         </Main>

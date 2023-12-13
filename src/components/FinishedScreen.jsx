@@ -1,8 +1,10 @@
+import { ACTIONS } from "../App";
+
 export function FinishedScreen({
   userScore,
   maxPossiblePoints,
   score,
-  onRestartQuiz,
+  dispatch,
 }) {
   const percentage = (userScore / maxPossiblePoints) * 100;
   let emoji;
@@ -22,7 +24,10 @@ export function FinishedScreen({
 
       <p className="highscore"> Highscore: {score} points</p>
 
-      <button className="btn btn-ui" onClick={onRestartQuiz}>
+      <button
+        className="btn btn-ui"
+        onClick={() => dispatch({ type: ACTIONS.RESTART_QUIZ })}
+      >
         {" "}
         Restart
       </button>
