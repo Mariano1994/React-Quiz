@@ -25,8 +25,14 @@ export const ACTIONS = {
 const initialState = {
   questions: [],
 
-  //Possible Values of status: 'Loading', 'Error', 'Ready'. 'Active', 'Finished'
-  status: "Loading",
+  status: {
+    loading: "Loading",
+    ready: "Ready",
+    active: "Active",
+    completed: "Finished",
+    error: "Error",
+  },
+
   indexOfCurrentQuestion: 0,
   userAnswer: null,
   userScore: 0,
@@ -39,13 +45,17 @@ const SECOND_PER_QUESTION = 30;
 function reducer(state, action) {
   switch (action.type) {
     case ACTIONS.DATA_RECEIVED:
-      return { ...state, questions: action.payload, status: "Ready" };
+      return {
+        ...state,
+        questions: action.payload,
+        status: initialState.status.ready,
+      };
     case ACTIONS.DATA_FEILED:
-      return { ...state, status: "Error" };
+      return { ...state, status: initialState.status.error };
     case ACTIONS.START_QUIZ:
       return {
         ...state,
-        status: "Active",
+        status: initialState.status.active,
         secondRemanining: state.questions.length * SECOND_PER_QUESTION,
       };
     case ACTIONS.USER_RESPONSE:
@@ -68,7 +78,7 @@ function reducer(state, action) {
     case ACTIONS.QUIZ_COMPLETED:
       return {
         ...state,
-        status: "Finished",
+        status: initialState.status.completed,
         score: state.score > state.userScore ? state.score : state.userScore,
       };
 
@@ -76,7 +86,7 @@ function reducer(state, action) {
       return {
         ...initialState,
         questions: state.questions,
-        status: "Ready",
+        status: initialState.status.ready,
         score: state.score,
       };
 
@@ -84,7 +94,10 @@ function reducer(state, action) {
       return {
         ...state,
         secondRemanining: state.secondRemanining - 1,
-        status: state.secondRemanining === 0 ? "Finished" : state.status,
+        status:
+          state.secondRemanining === 0
+            ? initialState.status.completed
+            : state.status,
       };
     default:
       return new Error("Action unknown");
@@ -114,13 +127,9 @@ export function App() {
   useEffect(() => {
     fetch("http://localhost:9000/questions")
       .then((response) => response.json())
-      .then((data) => dispatch({ type: "dataReceived", payload: data }))
-      .catch((error) => dispatch({ type: "dataFeiled" }));
-  }, []);
-
-  function handleRestarQuiz() {
-    dispatch({ type: "restart" });
-  }
+      .then((data) => dispatch({ type: ACTIONS.DATA_RECEIVED, payload: data }))
+      .catch((error) => dispatch({ type: ACTIONS.DATA_FEILED }));
+  }, [ACTIONS.DATA_FEILED, ACTIONS.DATA_RECEIVED]);
 
   return (
     <>
@@ -128,12 +137,12 @@ export function App() {
         <Header />
 
         <Main>
-          {status === "Loading" && <Loader />}
-          {status === "Error" && <Error />}
-          {status === "Ready" && (
+          {status === initialState.status.loading && <Loader />}
+          {status === initialState.status.error && <Error />}
+          {status === initialState.status.ready && (
             <StartScreen totalQuestions={totalQuestions} dispatch={dispatch} />
           )}
-          {status === "Active" && (
+          {status === initialState.status.active && (
             <>
               <ProgressBar
                 indexOfCurrentQuestion={indexOfCurrentQuestion}
@@ -163,7 +172,7 @@ export function App() {
             </>
           )}
 
-          {status === "Finished" && (
+          {status === initialState.status.completed && (
             <FinishedScreen
               userScore={userScore}
               maxPossiblePoints={maxPossiblePoints}
